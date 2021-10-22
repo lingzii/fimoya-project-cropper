@@ -1,0 +1,612 @@
+cropper使用說明
+	一、特性
+		jQuery v1.9.1以上版本支援
+		外掛有38個options,27種methods,6種事件
+		支援手機端touch事件
+		支援縮放
+		支援旋轉
+		支援翻轉
+		支援多個croppers
+		支援在canvas上修剪
+		支援在瀏覽器端通過canvas修剪圖片
+		Supports to translate Exif Orientation information
+		跨瀏覽器支援
+	二、檔案目錄
+		dist/
+		├── cropper.css       ( 5 KB)
+		├── cropper.min.css   ( 4 KB)
+		├── cropper.js        (80 KB, UMD)
+		├── cropper.min.js    (30 KB, UMD, compressed)
+		├── cropper.common.js (80 KB, CommonJS)
+		└── cropper.esm.js    (80 KB, ES Module)
+	三、開始cropper之旅
+		下載最新版本 https://github.com/fengyuanchen/cropper
+		也可以在http://www.bootcdn.cn/cropper/下載各個版本，也可以直接引用
+
+1.使用
+	1>引入檔案：
+		<script src="/path/to/jquery.js"></script>				// 需要jquery
+		<link  href="/path/to/cropper.css" rel="stylesheet"> 	// 引入css
+		<script src="/path/to/cropper.js"></script>	 			// 引入js
+	2>初始化：
+		<div>
+			<img id="image" src="img.jpg">			// 需要在處理的圖片標籤(canvas也可以)外層，包裹一個塊元素(div)，不可省略！
+		</div>
+		img {
+			max-width: 100%; 		// 限制圖片最大寬度，避免超出外層容器，必須！
+		}
+		$('#image').cropper(options);		// 初始化cropper
+
+2.常見問題
+	雙擊用於模式切換，按住shift用於裁剪寬高比固定的區域
+	1>放大或縮小後，如何裁剪一個區域
+		雙擊滑鼠進入 '裁剪模式'
+	2>裁剪一個區域後，如何移動圖片
+		雙擊滑鼠進入 '移動模式'
+	3>自由寬高比模式下，固定寬高比
+		調整裁剪框時，按住 'shift'
+	4>自由寬高比模式下，如何裁剪一個正方形區域
+		裁剪圖片時，按住 'shift'
+
+3.注意
+	1）修剪器的大小繼承包裹影象的div，確保此div可見。
+	2）如果在模態框中使用cropper，必須等模態框完全顯示後再初始化裁剪器。輸出的裁剪資料基於原始影象尺寸，因此可以使用它們直接裁剪影象。
+	3）如果在跨源的影象上使用cropper,需要瀏覽器支援HTML5 CORS設定屬性，圖片伺服器支援Access-Control-Allow-Origin option,(參閱HTTP access control(CORS)).
+
+4.已知的問題
+	1>已知的iOS資源限制，由於iOS裝置限制記憶體，當裁剪大影象（iPhone相機的解析度)時，瀏覽器可能會崩潰。為了避免這種情況，您可以在啟動裁剪器之前首先調整影象的大小（低於1024畫素）。
+
+	2>影象尺寸的增加問題：使用HTMLCanvasElement.toDataURL()在瀏覽器端匯出裁剪的影象時，匯出的影象可能大於原始影象大小，這是因為匯出的影象型別與原始影象不同。只需將原始影象作為第一個引數傳遞給toDataURL可解決此問題。如果原始型別是jpeg,用$().cropper('getCroppedCanvas').toDataURL('image/jpeg')來匯出影象。
+
+5.Options - 配置項
+	用$().cropper(options)設定配置項，用$.fn.cropper.setDefaults(options)來改變全域性預設配置項。
+
+	1) viewMode - 檢視模式
+		type: Number
+		定義裁剪器的檢視模式，預設值是0，
+		0：裁剪框可以在畫布外展開，
+		1，2，3將裁剪框限制為畫布大小，2或3將畫布限制到容器。
+		2.限制最小畫布尺寸以適應容器。如果畫布與容器比例不同，則最小畫布的其中一個維度被額外的空格包圍。
+
+	2）dragMode - 拖動模式
+		type：String
+		定義裁剪器的拖動模式，default: 'crop',
+		options
+			'crop': 建立一個新的裁剪框
+			'move',移動canvas
+			'none',什麼也不做
+
+	3）aspectRatio - 寬高比
+		type: Number
+		設定裁剪框的寬高比，預設情況下，為空閒比例（NaN）。
+
+	4）data - 初始化圖片資料
+		type: Object,default: null，如果儲存了以前的資料，將自動傳遞給setData方法。
+
+	5）preview - 預覽
+		type: String(jQuery selector),default: '',為預覽新增額外的元素（容器）。
+		注意：最大寬度（高度）是預覽容器的初始寬度（高度）。
+		如果設定了aspectRatio選項，請確保以相同的寬高比設定預覽容器。
+		如果預覽沒有正確顯示，請給預覽容器設overflow:hidden
+
+	6) responsive(實時響應)
+		調整視窗大小時，重新渲染裁剪器。
+		type：Boolean,default: true
+
+	7) restore
+		調整視窗大小後，恢復裁剪區域。
+		type：Boolean,default: true
+
+	8）checkCrossOrigin
+		檢查當前影象是否是跨源影象
+		type：Boolean,default: true
+		如果是，當克隆影象時，將crossOrigin屬性新增到克隆的影象元素中，並將時間戳新增到src屬性以重新載入源影象以避免瀏覽器快取錯誤。
+		通過將crossQrigin屬性新增到影象將停止向影象url新增時間戳，並停止重新載入影象。
+		如果影象的crossOrigin屬性值為"use-credentials",則在通過XMLHttpRequest讀取影象資料時，withCredentials屬性將會設定為true。
+
+	9）checkOrientation
+		檢查當前影象的Exif Orientation information
+		type：Boolean,default: true
+
+		更準確的說，讀取旋轉或翻轉影象的Orientation值，然後用1（default）覆蓋Orientation值，以免在iOS裝置上出現一些問題（#120， #509）	
+		需要同時設定ratatable（旋轉）和scalable(縮放)為true
+		注意：不要總是相信這個，因為一些jpg影象有不正確的方向值。
+		需要Typed Arrays support(IE10+)
+
+	10) modal
+		在影象的上方和裁剪框的下方顯示黑色模態。
+		type：Boolean,default: true
+
+	11) guides
+		顯示裁剪框上的虛線
+		type：Boolean,default: true
+
+	12）center
+		在裁剪框上顯示中心指示器。
+		type：Boolean,default: true
+
+	13）highlight
+		在裁剪框上顯示白色模態（突出顯示裁剪框）
+		type：Boolean,default: true
+
+	14）background
+		顯示容器的網格背景
+		type：Boolean,default: true
+
+	15）autoCrop
+		在初始化時啟用自動裁剪影象。
+		type: Boolean，預設值為：true
+
+	16）autoCropArea
+		介於0和1之間的數字，定義自動裁剪區域的大小（百分比）
+		type： Number,預設值： 0.8（80%）的影象
+
+	17）movable
+		啟用移動影象
+		type：Boolean,default: true
+
+	18）ratotable(可旋轉)
+		啟用旋轉影象
+		type: boolean,default: true
+
+	19) scalable(可縮放)
+		type: boolean,default: true
+		Enable to scale the image
+
+	20）zoomable
+		type: boolean,default: true
+		Enable to zoom the image
+
+	21) zoomOnTouch
+		type: boolean,default: true
+		啟用通過拖動觸控縮放影象。
+
+	22）zoomOnWheel
+		type: boolean,default: true
+		啟用通過滑鼠滾輪縮放影象。
+
+	23）wheelZoomRatio
+		通過滾動滾輪縮放時的縮放倍率
+		type：Number Default: 0.1
+
+	24) cropBoxMovable
+		type: boolean，default: true
+		啟用通過拖動來移動裁剪框。
+
+	25）cropBoxResizable
+		type: boolean，default: true
+		啟用通過拖動來調整裁剪框的大小。
+
+	26）toggleDragModeOnDblclick
+		型別：布林值
+		預設值：true
+		雙擊裁剪器，在 'crop-重新定義裁剪器' 和 'move-移動裁剪器' 模式下切換
+
+	27）minContainerWidth
+		型別：數字
+		預設值：200
+		容器的最小寬度。
+
+	28) minContainerHeight
+		型別：數字
+		預設值：100
+		容器的最小高度。
+
+	29) minCanvasWidth
+		型別：數字
+		預設值：0
+		畫布的最小寬度（img wrapper-圖片外層的div）。
+
+	30) minCanvasHeight
+		型別：數字
+		預設值：0
+		畫布的最小高度（影象包裝器）。
+
+	31) minCropBoxWidth
+		型別：數字
+		預設值：0
+		裁剪框的最小寬度。
+		注意：這個大小是相對於頁面，而不是影象。
+
+	32) minCropBoxHeight
+		型別：數字
+		預設值：0
+		裁剪框的最小高度。
+		注意：這個大小是相對於頁面，而不是影象。
+
+	/*
+		cropper事件繫結的便捷方法，直接作為屬性傳遞：
+			$('#image').cropper({
+				guides: false,
+				ready: function(e){
+				
+				},
+			});
+		而不用再次呼叫
+			$('#image').cropper({
+				guides: false,
+			});
+			$('#image').on("ready", function(e){
+			
+			});
+	 */
+
+	33) ready
+		型別：function
+		預設值：null
+		A shortcut of the "ready" event.
+
+	34) cropstart
+		型別：function
+		預設值：null
+		A shortcut of the "cropstart" event。
+
+	35) cropmove
+		Type: Function
+		Default: null
+		A shortcut of the "cropmove" event.
+
+	36) cropend
+		Type: Function
+		Default: null
+		A shortcut of the "cropend" event.
+
+	37) crop
+		Type: Function
+		Default: null
+		A shortcut of the "crop" event.
+
+	38) zoom
+		Type: Function
+		Default: null
+		A shortcut of the "zoom" event.
+6.Methods - 方法
+	由於載入影象是一個非同步程序，所以應該在ready之後呼叫大部分方法，除了setAspectRatio,replace and destroy。
+	例如：
+		$('#image').cropper({
+		  	ready: function () {
+
+		  		// 呼叫方法
+		  		// 格式：cropper('方法名', '引數1', '引數2', ...)
+			    $('#image').cropper('method', argument1, , argument2, ..., argumentN);
+		  	}
+		});
+
+	1) crop() - 選擇好選區，呼叫即可手動裁剪！
+		$('#image').cropper({
+		  autoCrop: false,		// 關閉自動裁剪
+			ready: function () {
+				// Do something here
+
+				/*
+					這裡才是呼叫 'crop()' 方法				
+				 */
+				$(this).cropper('crop');		// 裁剪(這裡的$(this) === $('#image'))
+			}
+		});
+
+	2) reset()
+		將影象和裁剪框重置為初始狀態。
+
+	3) clear()
+		清除裁剪框。
+
+	4）replace(url[, onlyColorChanged])
+		更換影象的src並重建裁剪器。
+		引數:
+			url 
+				type: String
+				新影象的url。
+			onlyColorChanged(可選)
+				type: 布林值，預設值為 false。
+				如果只改變顏色，而不是大小，那麼裁剪器只需要更改所有相關影象的srcs，不需要重新構建裁剪器。 這可以用於應用過濾器。
+
+	5) enable()
+		啟用（解凍）裁剪器。
+
+	6）disable()
+		禁用（凍結）裁剪器。
+
+	7）destroy()
+		銷燬裁剪器，並從影象中刪除例項。
+
+	8）move(offsetX[,offsetY])
+		canvas(圖片外層div)，水平和垂直方向的偏移量，相對於當前位置，單位為px。
+		offsetX - 水平
+		offsetY - 垂直(如果未設定，預設值是：offsetX)
+		例項：
+			$('#image').cropper('move', 1);
+			$('#image').cropper('move', 1, 0);
+			$('#image').cropper('move', 0, -1);
+
+	9）moveTo(x[,y])
+		canvas(圖片外層div)，水平和垂直方向的絕對定位，相對於初始位置，單位為px。
+
+	10）zoom(ratio)
+		canvas(圖片外層div)，相對縮放。(縮放的是canvas)
+		type: Number,
+		放大，ratio > 0,
+		縮小，ratio < 0
+		例項：
+			$('#image').cropper('zoom', 0.1);
+			$('#image').cropper('zoom', -0.1);
+
+	11) zoomTo(ratio)
+		canvas(圖片外層div)，絕對縮放。
+		例項：
+			// 1:1（canvasData.width === canvasData.naturalWidth）	// 1:1，縮放後寬度 == 原始寬度
+			$('#image').cropper('zoomTo', 1);
+
+	12) rotate(degree)
+		相對當前位置，旋轉影象。(旋轉的是影象)
+		type：Number
+		向右旋轉(順時針)：需要正數（度數> 0）
+		向左旋轉(逆時針)：需要負數（度<0）
+
+		Requires CSS3 2D Transforms support (IE 9+).
+
+	13) rotateTo(degree)
+		旋轉影象到某個角度。(旋轉的是影象)
+
+	14）scale(scaleX[,scaleY])
+		X軸和Y軸，拉伸圖片。
+		scaleX
+			預設值為：1，表示什麼都不做。
+		scaleY
+			未設定，預設值為：scaleX	
+		-1，正好相反(也就是映象)。範圍應該是 -Infinite ~ +Infinite
+
+		Requires CSS3 2D Transforms support (IE 9+).
+		例項：
+			$('#image').cropper('scale', -1); 		// X軸&Y軸同時映象
+			$('#image').cropper('scale', -1, 1); 	// X軸映象
+			$('#image').cropper('scale', 1, -1); 	// Y軸映象
+
+	15) scaleX(scaleX)
+		X軸拉伸圖片
+
+	16) scaleY(scaleY)
+		Y軸拉伸圖片
+
+	17) getData([rounded])
+		輸出最終裁剪區域的位置和大小資料（基於原影象的尺寸）。
+		返回一個物件：
+			x:裁剪區域左側的偏移量
+			y:裁剪區域頂部的偏移量
+			width：裁剪區域的寬度
+			height：裁剪區域的高度
+			rotate：影象的旋轉度。
+			scaleX：X軸的拉伸
+			scaleY：Y軸拉伸
+		引數：
+			rounded - 可選，boolean型別，預設為：false。設定為true，返回四捨五入後的資料
+		提示：
+			我們可以將獲取到的裁剪資料，直接傳送到伺服器後端，來進行影象的裁剪：
+			使用rotate旋轉影象。
+			使用scaleX和scaleY拉伸影象。
+			使用x,y,width,height裁剪影象。
+
+	18）setData(data)
+		傳遞一個同 'getData()' 返回的物件，來設定影象的裁剪區域。(基於原圖)
+		傳遞的資料，是經過 'round' 四捨五入後的資料
+		注意：
+			此方法僅在 'viewMode' 選項大於或等於1時可用。
+
+	19）getContainerData()
+		輸出最外層容器的大小資料。
+		返回一個物件：
+			width - 當前容器的寬
+			height - 當前容器的高
+
+	20）getImageData()
+		輸出影象位置、大小以及其他相關資料
+		返回一個物件：
+			left - 影象的左偏移
+			top - 影象的上便宜
+			width - 影象的寬度
+			height - 影象的高度
+			naturalWidth - 影象的自然寬度
+			naturalHeight - 影象的自然高度
+			aspectRatio - 影象的寬高比
+			rotate - 影象的旋轉角度
+			scaleX - 影象的X軸拉伸
+			scaleY - 影象的Y軸拉伸
+
+	21）getCanvasData()
+		輸出canvas(圖片外層div)位置、大小資料。
+		返回一個物件：
+			left - canvas的左偏移
+			top - canvas的上便宜
+			width - canvas的寬度
+			height - canvas的高度
+			naturalWidth - canvas的自然寬度
+			naturalHeight - canvas的自然高度
+		例項：
+			var imageData = $('#image').cropper('getImageData');
+			var canvasData = $('#image').cropper('getCanvasData');
+
+			// 180°旋轉影象時，影象尺寸 == canvas尺寸
+			if (imageData.rotate % 180 === 0) {
+			  console.log(canvasData.naturalWidth === imageData.naturalWidth);
+			}
+
+	22）setCanvasData(data)
+		傳遞新資料物件，設定canvas(圖片外層div)位置和大小。
+		物件屬性：
+			left - canvas的左偏移
+			top - canvas的上便宜
+			width - canvas的寬度
+			height - canvas的高度
+
+	23) getCropBoxData()
+		輸出裁剪框的位置和大小資料
+		返回一個物件:
+			left - 裁剪框的左偏移
+			top - 裁剪框的上偏移
+			width - 裁剪框的寬度
+			height - 裁剪框的高度
+
+	24）setCropBoxData(data)
+		傳遞新資料物件，設定裁剪框的位置和大小資料
+		物件屬性:
+			left - 裁剪框的左偏移
+			top - 裁剪框的上偏移
+			width - 裁剪框的寬度
+			height - 裁剪框的高度
+
+	25) getCroppedCanvas([options]);
+		返回影象裁剪後，繪製的canvas物件，如果影象未裁剪，則將返回整個影象，繪製的canvas。
+		返回結果型別是：HTMLCanvasElement 元素物件
+		有了canvas物件後，我們就可以呼叫canvas的API，來進行處理。可以直接將畫布顯示為影象，或者使用HTMLCanvasElement.toDataURL獲取資料URL，或者如果瀏覽器支援這些API，則使用HTMLCanvasElement.toBlob獲取一個Blob並將其上傳到具有FormData的伺服器。
+		引數 'options' 是一個物件：
+			width - 輸出的canvas的寬度
+			height - 輸出的canvas的高度
+			fillColor - 輸出canvas中的透明區域，填充的顏色
+			imageSmoothingEnabled - 啟用影象的平滑處理(預設是true)
+			imageSmoothingQuality - 設定影象平滑處理的質量，可選值有：low, medium, high
+		注意(重要！)：
+			1>輸出畫布的寬高比將自動適應裁剪框的縱橫比。
+			2>如果打算從輸出畫布獲取JPEG影象，則應首先設定fillColor選項，否則JPEG影象中間的透明部分預設為黑色。
+		瀏覽器支援：
+			Basic image: requires Canvas support (IE 9+).
+			Rotated image: requires CSS3 2D Transforms support (IE 9+).
+			Cross-origin image: requires HTML5 CORS settings attributes support (IE 11+).
+			Get a canvas drawn the cropped image. If it is not cropped, then returns a canvas drawn the whole image.
+		例項：
+			1>不傳參
+				$('#image').cropper('getCroppedCanvas');
+			2>傳遞引數物件
+				$('#image').cropper('getCroppedCanvas', {
+				  	width: 160,
+				  	height: 90,
+				  	fillColor: '#fff',
+				  	imageSmoothingEnabled: false,
+				  	imageSmoothingQuality: 'high',
+				});
+			3>如果瀏覽器支援“HTMLCanvasElement.toBlob”，則將裁剪的影象上傳到伺服器
+				$('#image').cropper('getCroppedCanvas').toBlob(function (blob) {
+
+					// 檢視HTML5的 'formdata' 文件
+					// https://developer.mozilla.org/zh-CN/docs/Web/API/FormData
+				  	var formData = new FormData();
+				  	formData.append('croppedImage', blob);
+				  	$.ajax('/path/to/upload', {
+					    method: "POST",
+					    data: formData,
+					    processData: false,
+					    contentType: false,
+					    success: function () {
+					      	console.log('Upload success');
+					    },
+					    error: function () {
+					      	console.log('Upload error');
+					    }
+				  	});
+				});
+
+	26) setAspectRatio(aspectRatio)
+		設定裁剪框的寬高比
+		aspectRatio：
+			型別：Number。必須是正數。
+
+	37）setDragMode([mode])
+		設定拖拽模式
+		[mode]可選，可以是：none, crop, move任意一個，預設是 'none'。
+		提示：	
+			可以雙擊裁剪框來切換 'crop' 和 'move' 模式。
+
+7.Events - 事件，對應上面繫結的事件，這裡是說明事件返回的物件
+	1）ready
+		當一個cropper例項完全構建時，觸發該事件
+
+	2) cropstart
+		當canvas(圖片外層div)或者裁剪框開始改變時觸發此事件。
+		1>event.originalEvent:
+			type: Event
+			options: mousedown,mousestart和pointerdown
+		2>event.action
+			type: String
+			Options: 
+				crop - 建立一個新的裁剪框，
+				move - 移動canvas(image wrapper)
+				zoom - 通過觸控放大和縮小canvas(image wrapper)
+				// 調整裁剪框各個方向的大小
+				e - 東
+				w - 西
+				n - 北
+				s - 南
+				se - 東南
+				sw - 西南
+				ne - 東北
+				nw - 西北
+				all - 移動裁剪框（所有方向）
+		例項：
+			$('#image').on('cropstart', function (e) {
+				console.log(e.type); 		// cropstart - 事件型別
+				console.log(e.namespace); 	// cropper - 名稱空間
+				console.log(e.action);		// {} - 行為 
+				console.log(e.originalEvent.pageX); 	// originalEvent - 待定
+
+				// 如果需要，阻止cropping, moving等。
+				if (e.action === 'crop') {
+					e.preventDefault();
+				}
+			});
+	3) cropmove
+		當canvas（image wrapper）或裁剪框改變時觸發此事件。
+		1>event.originalEvent
+			type: Event
+			Options: mousemove,touchmove和pointermove
+		2>event.action 
+			同 'cropstart'
+
+	4）cropend
+		當canvas（image wrapper）或裁剪框停止更改時會觸發此事件。
+		1>event.originalEvent:
+			Type: Event
+			Options: mouseup, touchend, touchcancel, pointerup and pointercancel.
+		2>event.action
+			同 'cropstart'
+
+	5) crop
+		當canvas（image wrapper）或裁剪框更改時，會觸發此事件。
+		返回的事件的一些屬性，同 'getData()' 方法返回的物件一致
+			event.x
+			event.y
+			event.width
+			event.height
+			event.rotate
+			event.scaleX
+			event.scaleY
+
+	6) zoom
+	    當裁剪器例項開始放大或縮小canvas（image wrapper）時，觸發此事件。 
+		1>event.originalEvent:
+			Type: Event
+			Options: wheel, touchmove.
+		2>event.oldRatio:
+			縮放前，canvas的比例
+			Type: Number
+		3>event.ratio:
+			縮放後，canvas的比例(縮放後的寬 / 自然寬)
+			Type: Number
+		例項：
+		    $('#image').on('zoom', function (e) {
+
+		    	// 縮放後比例 > 縮放前，表示放大(zoom in)
+			  	if (e.ratio > e.oldRatio) {
+			    	e.preventDefault();
+				}
+
+		    	// 縮放後比例 < 縮放前，表示縮小(zoom out)
+			  	if (e.ratio < e.oldRatio) {
+			  		// 不允許縮小
+			    	e.preventDefault();
+				}
+			});
+
+8.解決cropper衝突
+	使用了同 'cropper' 相同名稱空間的其他外掛，呼叫 '$.fn.cropper.noConflict()' 來轉換cropper
+
+9.Browser支援
+	IE 9+
