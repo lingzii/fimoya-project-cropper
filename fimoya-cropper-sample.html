@@ -57,19 +57,19 @@
         <p></p>
         <label class="btn btn-info">
           <input id="upload_img" style="display: none" class="btn btn-info" type="file" accept="image/*" />
-          <i class="fa fa-photo"></i>上傳圖片
+          <i class="fa fa-photo"></i> 載入圖片
         </label>
         <p></p>
 
         <label class="btn btn-info">
           <input id="crop_img" style="display: none" />
-          <i class="fa fa-scissors"></i>裁剪圖片
+          <i class="fa fa-scissors"></i> 裁剪圖片
         </label>
         <p></p>
 
         <label class="btn btn-info">
           <input id="reset_img" style="display: none" />
-          <i class="fa fa-sync-alt"></i>重設圖片
+          <i class="fa fa-sync-alt"></i> 重設圖片
         </label>
         <p></p>
 
@@ -169,100 +169,16 @@
       </div>
       <div class="col-6 box">
         <div>
-          <img id="imgd" style="display: block; max-width: 100%" src="img/head/1.jpg" alt="Picture" />
+          <img id="image" style="display: block; max-width: 100%" src="img/head/1.jpg" alt="Picture" />
         </div>
       </div>
-      <div class="col-3">
-        <div id="preview">Preview section</div>
-        <div id="result">Result section</div>
+      <div class="col-4">
+        <div class="preview">Preview section</div>
+        <div class="result">Result section</div>
       </div>
     </div>
   </div>
 </body>
-<script type="text/javascript">
-  function canvasCrop(source) {
-    var canvas = document.createElement("canvas");
-    var context = canvas.getContext("2d");
-    var width = source.width;
-    var height = source.height;
-    canvas.width = width;
-    canvas.height = height;
-    context.imageSmoothingEnabled = true;
-    //圖像平滑度開啟
-    context.drawImage(source, 0, 0, width, height);
-    //drawImage(img,dx,dy,dwidth,dheight)
-    context.globalCompositeOperation = "destination-in";
-    // globalCompositeOperation含12種合成設定，每一種合成設定均將套用到新繪製的圖形上
-    //destination-in只保留新、舊圖形重疊的舊圖形區域，其餘皆變為透明。
-    context.beginPath();
-    context.rect(0, 0, width, height);
-    context.fill();
-    //填充填滿
-    return canvas;
-  }
-  var image = document.getElementById("imgd");
-  var button = document.getElementById("crop_img");
-  var result = document.getElementById("result");
-  var croppable = false;
-  var cropper = new Cropper(image, {
-    aspectRatio: NaN,
-    //比例
-    viewMode: 1,
-    //裁剪空間可以到外面
-    preview: ".preview",
-    //預覽圖
-    ratotable: true,
-    //可旋轉但我沒做
-    crop(event) {
-      croppable = true;
-      //當正在拉圖的時候表示true(框在上面的時候)
-    },
-  });
-  button.onclick = function () {
-    var croppedCanvas;
-    var roundedCanvas;
-    var roundedImage;
-    if (!croppable) {
-      return;
-    }
-    var image = document.getElementById("imgd");
-    var button = document.getElementById("crop_img");
-    var result = document.getElementById("result");
-    var croppable = false;
-    var cropper = new Cropper(image, {
-      aspectRatio: NaN,
-      //比例
-      viewMode: 0,
-      //裁剪空間可以到外面
-      preview: ".preview",
-      //預覽圖
-      ratotable: true,
-      //可旋轉但我沒做
-      crop(event) {
-        croppable = true;
-        //當正在拉圖的時候表示true(框在上面的時候)
-      },
-    });
-    button.onclick = function () {
-      if (!croppable) {
-        return;
-      }
-      // Crop
-      var croppedCanvas = cropper.getCroppedCanvas();
-      //返回影象裁剪後，繪製的canvas物件，如果影象未裁剪，則將返回整個影象，繪製的canvas。
-      // Round
-      var roundedCanvas = canvasCrop(croppedCanvas);
-      //繪製canvas。
-      // Show
-      var roundedImage = document.createElement("img");
-      roundedImage.src = roundedCanvas.toDataURL();
-      //roundedCanvas轉成圖片+base64模式 (toDataURL)
-      result.innerHTML = "";
-      //清空HTML讓他不會重複生成
-      result.appendChild(roundedImage);
-      //生成圖片在result 用生成appendChild子節點的方式
-    };
-  };
-</script>
+<script src="js/cropper-controller.js"></script>
 
 </html>
