@@ -5,7 +5,7 @@ var result = document.getElementById("result");
 var btn_crop = document.getElementById("crop_img");
 var btn_reset = document.getElementById("reset_img");
 var btn_upload = document.getElementById("upload_img");
-var btn_zoomIn = null;
+var toggle = document.getElementById("docs-toggles");
 
 var cropper, options;
 var croppable = false;
@@ -66,7 +66,6 @@ btn_upload.onchange = function () {
 };
 
 btn_crop.onclick = function () {
-  console.log("foo");
   if (!croppable) return;
   var croppedCanvas = cropper.getCroppedCanvas();
   var roundedCanvas = canvasCrop(croppedCanvas);
@@ -81,6 +80,11 @@ btn_reset.onclick = function () {
     cropper.destroy();
   }
   initialCropper();
+};
+
+toggle.onchange = function (event) {
+  var target = event.target;
+  console.log(target);
 };
 
 // ---------------------- Window onload ------------------------ //
