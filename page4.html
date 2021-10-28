@@ -70,12 +70,6 @@
 		              1:1
 		            </span>
 		            </label>
-		           	<label class="btn btn-primary">
-		            <input type="radio" class="sr-only" id="aspectRatio2" name="aspectRatio" value="0.67">
-		            <span class="docs-tooltip" data-toggle="tooltip">
-		              2:3
-		            </span>
-		         	</label>
 		            <label class="btn btn-info">
 					<input type="radio" class="sr-only" id="aspectRatio3" name="aspectRatio" value="1.78">
 					<span class="docs-tooltip" data-toggle="tooltip">
@@ -96,6 +90,19 @@
 		            </label>
 				</div>
 			</div>
+			<div id="skill">
+				<div class="skill_list">
+					<button class="btn btn-info" id="add">
+						放大
+					</button>
+					<button class="btn btn-info" id="pop">
+						縮小
+					</button>
+				</div>
+			</div>
+			<input type="number" id="dataWidth">
+			<input type="number" id="dataHeight">
+
 		</div>
 		<div id="result"></div>
 	</body>
@@ -125,6 +132,9 @@ var button = document.getElementById('crop_img');
 var result = document.getElementById('result');
 var croppable = false;
 var Tool_box = document.getElementById('Tool_box');
+var skill = document.getElementById('skill');
+var dataHeight = document.getElementById('dataHeight');
+var dataWidth = document.getElementById('dataWidth');
 var options={
 	aspectRatio: NaN,
 	//比例
@@ -132,9 +142,13 @@ var options={
 	//裁剪空間可以到外面
 	preview:".preview",
 	//預覽圖
-  crop(event) {
+  crop:function (e) {
+  	var data = e.detail;
   	croppable = true;
+  	console.log(e.type);
   	//當正在拉圖的時候表示true(框在上面的時候)
+      dataHeight.value = Math.round(data.height);
+      dataWidth.value = Math.round(data.width);
   	},
 }
 var cropper = new Cropper(image, options);
@@ -156,6 +170,18 @@ Tool_box.querySelector('.tool_list').onchange = function (event) {
       cropper = new Cropper(image, options);
 }
 
+skill.querySelector('.skill_list').onclick = function (event) {
+	var e=event;
+	var target=e.target;
+	switch(target.id){
+		case "add":
+		cropper.zoom(0.1,0);
+		break;
+		case "pop":
+		cropper.zoom(-0.1,0);
+		break;
+	}
+}
 button.onclick = function () {
     var croppedCanvas;
     var roundedCanvas;
