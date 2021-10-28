@@ -5,6 +5,7 @@ var result = document.getElementById("result");
 var btn_crop = document.getElementById("crop_img");
 var btn_reset = document.getElementById("reset_img");
 var btn_upload = document.getElementById("upload_img");
+var btn_zoomIn = null;
 
 var cropper, options;
 var croppable = false;
