@@ -5,27 +5,38 @@ var result = document.getElementById("result");
 var btn_crop = document.getElementById("crop_img");
 var btn_reset = document.getElementById("reset_img");
 var btn_upload = document.getElementById("upload_img");
+var tooltip = document.getElementById("docs-tooltip");
 var toggle = document.getElementById("docs-toggles");
+var dataWidth = document.getElementById("dataWidth");
+var dataHeight = document.getElementById("dataHeight");
+var formControl = $('input[class="form-control"]');
 
 var cropper, options;
 var croppable = false;
 
 // ------------------- Initial build cropper ------------------- //
 
-function initialCropper() {
-  options = {
-    aspectRatio: NaN,
-    viewMode: 1,
-    preview: ".preview",
-    ratotable: true,
-    crop(event) {
-      croppable = true;
-    },
-  };
+function initialCropper(restart = false) {
+  if (cropper) {
+    cropper.destroy();
+  }
+  if (!restart) {
+    options = {
+      aspectRatio: NaN,
+      viewMode: 1,
+      preview: ".preview",
+      ratotable: true,
+      crop(event) {
+        dataWidth.value = Math.round(event.detail.width);
+        dataHeight.value = Math.round(event.detail.height);
+        croppable = true;
+      },
+    };
+  }
   cropper = new Cropper(image, options);
 }
 
-// ------------------------------------------------------------- //
+// ----------------------- Export photo ------------------------ //
 
 function canvasCrop(source) {
   var canvas = document.createElement("canvas");
@@ -54,9 +65,6 @@ btn_upload.onchange = function () {
         URL.revokeObjectURL(uploadedImageURL);
       }
       image.src = uploadedImageURL = URL.createObjectURL(file);
-      if (cropper) {
-        cropper.destroy();
-      }
       initialCropper();
       btn_upload.value = null;
     } else {
@@ -76,19 +84,54 @@ btn_crop.onclick = function () {
 };
 
 btn_reset.onclick = function () {
-  if (cropper) {
-    cropper.destroy();
-  }
   initialCropper();
 };
 
-toggle.onchange = function (event) {
+tooltip.onclick = function (event) {
   var target = event.target;
-  console.log(target);
+  if (target.nodeName == "SPAN") {
+    // 如果是按到 favicon 時，就找 父層的 button
+    target = target.parentNode;
+  }
+  var method = target.getAttribute("data-method");
+  var value = target.getAttribute("value");
+  switch (method) {
+    case "zoom":
+      cropper.zoom(value);
+      break;
+    case "rotate":
+      cropper.rotate(value);
+      break;
+    case "scaleX":
+      cropper.scaleX(value);
+      target.setAttribute("value", -value);
+      break;
+    case "scaleY":
+      cropper.scaleY(value);
+      target.setAttribute("value", -value);
+      break;
+  }
+};
+
+toggle.onchange = function (event) {
+  options["aspectRatio"] = event.target.value;
+  initialCropper(true);
 };
 
 // ---------------------- Window onload ------------------------ //
 
 window.onload = function () {
   initialCropper();
+
+  // ------- Fail at work, 從 input 改變 選取框大小 ------ //
+  formControl.each(function (index, element) {
+    element.addEventListener("input", function (event) {
+      var key = event.target.name;
+      var val = event.target.value;
+      var data = cropper.getData();
+      data[key] = val;
+      cropper.setData(data);
+    });
+  });
+  // --------------------------------------------------- //
 };
