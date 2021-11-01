@@ -26,6 +26,22 @@ function initialCropper(restart = false) {
       viewMode: 1,
       preview: ".preview",
       ratotable: true,
+      //當cropper完全構建時觸發該事件
+      ready: function (e) {
+        console.log(e.type);
+      },
+      //裁剪框開始改變時觸發此事件
+      cropstart: function (e) {
+        console.log(e.type, e.detail.action);
+      },
+      //裁剪框改變時觸發此事件
+      cropmove: function (e) {
+        console.log(e.type, e.detail.action);
+      },
+      //裁剪框停止更改時會觸發此事件
+      cropend: function (e) {
+        console.log(e.type, e.detail.action);
+      },
       crop(event) {
         dataWidth.value = Math.round(event.detail.width);
         dataHeight.value = Math.round(event.detail.height);
