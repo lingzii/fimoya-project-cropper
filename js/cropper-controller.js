@@ -122,16 +122,15 @@ toggle.onchange = function (event) {
 
 window.onload = function () {
   initialCropper();
-
-  // ------- Fail at work, 從 input 改變 選取框大小 ------ //
   formControl.each(function (index, element) {
     element.addEventListener("input", function (event) {
       var key = event.target.name;
       var val = event.target.value;
       var data = cropper.getData();
-      data[key] = val;
+      data[key] = Number(val);
       cropper.setData(data);
     });
   });
-  // --------------------------------------------------- //
 };
+
+// ------------------------------------------------------------- //
